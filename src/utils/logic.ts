@@ -15,14 +15,21 @@ export const fetchWordList = async (): Promise<string[]> => {
     const res = await fetch("/words2.txt");
     const text = await res.text();
 
-    const words = text
-      .toLowerCase()
-      .replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g, "")
-      .split(/\s+/)
-      .filter((word) => word.length > 1);
+    const words = [
+      ...new Set(
+        text
+          .toLowerCase()
+          .replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g, "")
+          .split(/\s+/)
+          .filter((word) => word.length > 1)
+      ),
+    ];
+
+    // 🔹 Urutkan kata berdasarkan panjangnya, dari terpanjang ke terpendek
+    words.sort((a, b) => b.length - a.length);
 
     console.log(`✅ Berhasil memuat ${words.length} kata unik.`);
-    return [...new Set(words)];
+    return words;
   } catch (error) {
     console.error("❌ Gagal memuat words.txt:", error);
     return [];
