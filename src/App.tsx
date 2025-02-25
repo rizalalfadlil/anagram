@@ -10,7 +10,7 @@ const App: React.FC = () => {
   const [words, setWords] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
   const [anagrams, setAnagrams] = useState<string[]>([]);
-  const [time, setTime] = useState(0)
+  const [time, setTime] = useState(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
   const [searching, setSearching] = useState<boolean>(false);
@@ -47,7 +47,7 @@ const App: React.FC = () => {
     anagramWorker.onmessage = (event) => {
       const { results, time } = event.data;
       setAnagrams(results);
-      setTime(time)
+      setTime(time);
       setProgress(100);
       setSearching(false);
       console.log(`✅ Pencarian selesai dalam ${time.toFixed(2)} ms`);
@@ -56,7 +56,7 @@ const App: React.FC = () => {
     setWorker(anagramWorker);
     setStarted(true);
     setAnagrams([]);
-    setTime(0)
+    setTime(0);
     setProgress(0);
     setSearching(true);
 
@@ -115,22 +115,24 @@ const App: React.FC = () => {
           {started && (
             <>
               {anagrams.length > 0 ? (
-                <Result input={input} result={anagrams[0]} />
+                <>
+                  <Result input={input} result={anagrams[0]} />
+                  <Button
+                    onClick={() => {
+                      setStarted(false);
+                      setInput("");
+                    }}
+                  >
+                    <IoCloseCircleOutline size={20} />
+                    Tutup
+                  </Button>
+                </>
               ) : !searching ? (
                 <p>Tidak ada yang ditemukan.</p>
               ) : null}
               <p className="text-slate-400 text-xs">
-                waktu pencarian : {time.toFixed(2)} ms
+                waktu pencarian : {(time/1000).toFixed(2)} detik
               </p>
-              <Button
-                onClick={() => {
-                  setStarted(false);
-                  setInput("");
-                }}
-              >
-                <IoCloseCircleOutline size={20} />
-                Tutup
-              </Button>
             </>
           )}
         </>
