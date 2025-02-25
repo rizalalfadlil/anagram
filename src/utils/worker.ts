@@ -6,7 +6,7 @@ self.onmessage = (event) => {
   console.log("🚀 Worker mulai mencari anagram...");
   const startTime = performance.now();
 
-  const { results, time } = findAnagrams(input, words);
+  const { results } = findAnagrams(input, words);
 
   const endTime = performance.now();
   const elapsedTime = endTime - startTime;

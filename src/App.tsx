@@ -1,21 +1,16 @@
 import { useState, useEffect } from "react";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Input,
-  InputNumber,
-  Progress,
-  Spin,
-} from "antd";
+import { Button, Input, Progress, Spin } from "antd";
 import { fetchWordList } from "./utils/logic";
-import Result from "./result";
-import { MdCancel } from "react-icons/md";
+import Result from "./components/result";
+import { IoCloseCircleOutline } from "react-icons/io5";
+import { VscDebugStart } from "react-icons/vsc";
+import { Footer } from "./components/Footer";
 
 const App: React.FC = () => {
   const [words, setWords] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
   const [anagrams, setAnagrams] = useState<string[]>([]);
+  const [time, setTime] = useState(0)
   const [loading, setLoading] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
   const [searching, setSearching] = useState<boolean>(false);
@@ -52,6 +47,7 @@ const App: React.FC = () => {
     anagramWorker.onmessage = (event) => {
       const { results, time } = event.data;
       setAnagrams(results);
+      setTime(time)
       setProgress(100);
       setSearching(false);
       console.log(`✅ Pencarian selesai dalam ${time.toFixed(2)} ms`);
@@ -60,6 +56,7 @@ const App: React.FC = () => {
     setWorker(anagramWorker);
     setStarted(true);
     setAnagrams([]);
+    setTime(0)
     setProgress(0);
     setSearching(true);
 
@@ -81,6 +78,7 @@ const App: React.FC = () => {
         <Spin size="large" />
       ) : (
         <>
+          <p className="text-xl font-bold capitalize">anagram generator</p>
           <Input
             type="text"
             value={input}
@@ -95,12 +93,16 @@ const App: React.FC = () => {
             }
           />
           <div className="flex *:grow gap-4">
-            <Button type="primary" onClick={handleSearch} disabled={searching}>
-              Cari
+            <Button
+              type="primary"
+              onClick={handleSearch}
+              disabled={searching || input.length <= 0}
+            >
+              <VscDebugStart size={20} /> Cari
             </Button>
             {searching && (
               <Button danger onClick={handleStopSearch}>
-                <MdCancel /> Batal
+                <IoCloseCircleOutline size={20} /> Batal
               </Button>
             )}
           </div>
@@ -110,101 +112,30 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {started ? (
+          {started && (
             <>
               {anagrams.length > 0 ? (
                 <Result input={input} result={anagrams[0]} />
               ) : !searching ? (
                 <p>Tidak ada yang ditemukan.</p>
               ) : null}
+              <p className="text-slate-400 text-xs">
+                waktu pencarian : {time.toFixed(2)} ms
+              </p>
+              <Button
+                onClick={() => {
+                  setStarted(false);
+                  setInput("");
+                }}
+              >
+                <IoCloseCircleOutline size={20} />
+                Tutup
+              </Button>
             </>
-          ) : (
-            <Collapse
-              items={[
-                {
-                  key: "1",
-                  label: "Pengaturan performa",
-                  children: (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-start">
-                        <Checkbox
-                          checked={options.maxChar.enable}
-                          onChange={(e) =>
-                            setOptions({
-                              ...options,
-                              maxChar: {
-                                ...options.maxChar,
-                                enable: e.target.checked,
-                              },
-                            })
-                          }
-                        />{" "}
-                        <span className="grow">Batasi Maksimal Karakter</span>
-                        <Input
-                          disabled={!options.maxChar.enable}
-                          type="number"
-                          className="w-fit!"
-                          max={50}
-                          min={1}
-                          value={options.maxChar.value}
-                          onChange={(e) =>
-                            setOptions({
-                              ...options,
-                              maxChar: {
-                                enable: true,
-                                value: Number(e.target.value),
-                              },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="flex items-center gap-2 text-start">
-                        <Checkbox
-                          checked={options.maxTime.enable}
-                          onChange={(e) =>
-                            setOptions({
-                              ...options,
-                              maxTime: {
-                                ...options.maxTime,
-                                enable: e.target.checked,
-                              },
-                            })
-                          }
-                        />{" "}
-                        <span className="grow">Batasi Waktu Pencarian</span>
-                        <Input
-                          disabled={!options.maxTime.enable}
-                          type="number"
-                          className="w-fit!"
-                          max={50}
-                          min={1}
-                          value={options.maxTime.value}
-                          onChange={(e) =>
-                            setOptions({
-                              ...options,
-                              maxTime: {
-                                enable: true,
-                                value: Number(e.target.value),
-                              },
-                            })
-                          }
-                          suffix={<span className="text-sm">menit</span>}
-                        />
-                      </div>
-                    </div>
-                  ),
-                },
-              ]}
-            />
           )}
-          <footer>
-            <p>sumber</p>
-            <a href="https://www.kaggle.com/datasets/imroze/indonesian-and-malaysian-common-words-list">
-              daftar kata
-            </a>
-          </footer>
         </>
       )}
+      <Footer setOptions={setOptions} options={options} Number={Number} />
     </div>
   );
 };
